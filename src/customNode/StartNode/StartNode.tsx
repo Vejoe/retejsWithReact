@@ -1,7 +1,7 @@
 import * as React from "react";
 import { ClassicScheme, RenderEmit, Presets } from "rete-react-plugin";
 import styled, { css } from "styled-components";
-import { $nodewidth, $socketmargin, $socketsize } from "./vars";
+import { $nodewidth, $socketmargin, $socketsize } from "../../vars";
 
 const { RefSocket, RefControl } = Presets.classic;
 
@@ -30,11 +30,15 @@ export const NodeStyles = styled.div<
     css`
       border-color: red;
     `}
+
   .title {
     color: white;
     font-family: sans-serif;
     font-size: 18px;
     padding: 8px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
   .output {
     text-align: right;
@@ -95,7 +99,7 @@ export type NodeComponent<Scheme extends ClassicScheme> = (
   props: Props<Scheme>
 ) => JSX.Element;
 
-export function CustomNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
+export function StartNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
   const inputs = Object.entries(props.data.inputs);
   const outputs = Object.entries(props.data.outputs);
   const controls = Object.entries(props.data.controls);
@@ -105,6 +109,7 @@ export function CustomNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
   sortByIndex(inputs);
   sortByIndex(outputs);
   sortByIndex(controls);
+  console.log(JSON.stringify(props.data))
 
   return (
     <NodeStyles
@@ -122,7 +127,7 @@ export function CustomNode<Scheme extends ClassicScheme>(props: Props<Scheme>) {
         className="title"
         data-testid="title"
       >
-        {label}
+        Start
       </div>
       {/* Outputs */}
       {outputs.map(

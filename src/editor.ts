@@ -6,11 +6,15 @@ import {
   Presets as ConnectionPresets
 } from "rete-connection-plugin";
 import { ReactPlugin, Presets, ReactArea2D } from "rete-react-plugin";
-import { CustomNode } from "./CustomNode";
 import { StyledNode } from "./StyledNode";
-import { CustomSocket } from "./CustomSocket";
-import { CustomConnection } from "./CustomConnection";
 import { addCustomBackground } from "./custom-background";
+import { exportGraph } from "./ExportToJSON";
+
+import { StartNode } from "./customNode/StartNode/StartNode";
+import { StartNodeConnection } from "./customNode/StartNode/StartNodeConnection";
+import { StartNodeSocket } from "./customNode/StartNode/StartNodeSocket";
+
+import { AuthenticationNode } from "./customNode/AuthenticationNode/AuthenticationNode";
 
 type Schemes = GetSchemes<
   ClassicPreset.Node,
@@ -34,19 +38,23 @@ export async function createEditor(container: HTMLElement) {
     Presets.classic.setup({
       customize: {
         node(context) {
-          if (context.payload.label === "Fully customized") {
-            return CustomNode;
-          }
+
           if (context.payload.label === "Override styles") {
             return StyledNode;
+          }
+          if (context.payload.label === "StartNode") {
+            return StartNode;
+          }
+          if (context.payload.label === "AuthenticationNode") {
+            return AuthenticationNode;
           }
           return Presets.classic.Node;
         },
         socket(context) {
-          return CustomSocket;
+          return StartNodeSocket;
         },
         connection(context) {
-          return CustomConnection;
+          return StartNodeConnection;
         }
       }
     })
@@ -62,26 +70,59 @@ export async function createEditor(container: HTMLElement) {
 
   AreaExtensions.simpleNodesOrder(area);
 
-  const a = new ClassicPreset.Node("Override styles");
-  a.addOutput("a", new ClassicPreset.Output(socket));
-  a.addInput("a", new ClassicPreset.Input(socket));
-  await editor.addNode(a);
+  const startNode = new ClassicPreset.Node("StartNode");
+  startNode.addOutput("success", new ClassicPreset.Output(socket, "Next", false));
+  await editor.addNode(startNode);
 
-  const b = new ClassicPreset.Node("Fully customized");
-  b.addOutput("a", new ClassicPreset.Output(socket));
-  b.addInput("a", new ClassicPreset.Input(socket));
-  await editor.addNode(b);
 
-  await area.translate(a.id, { x: 0, y: 0 });
-  await area.translate(b.id, { x: 300, y: 0 });
+  const usernameNode = new ClassicPreset.Node("AuthenticationNode");
+  usernameNode.addInput("input", new ClassicPreset.Input(socket));
+  usernameNode.addOutput("success", new ClassicPreset.Output(socket,"success", false));
+  usernameNode.addOutput("fail", new ClassicPreset.Output(socket,"fail", false));
+  usernameNode.addControl("expression", new ClassicPreset.InputControl("text", {}));
+  usernameNode.addControl("description", new ClassicPreset.InputControl("text", {}));
+  usernameNode.addControl("nodeName", new ClassicPreset.InputControl("text", {
+    initial: 0,
+    readonly: false,
+    change(value) { }
+  }))
+  console.log("============usernameNode=============")
+  console.log(JSON.stringify(usernameNode));
+  console.log("============usernameNode=============")
+  await editor.addNode(usernameNode);
 
-  await editor.addConnection(new ClassicPreset.Connection(a, "a", b, "a"));
+
+
+  const usernameNode2 = new ClassicPreset.Node("AuthenticationNode");
+  usernameNode2.addInput("input", new ClassicPreset.Input(socket));
+  usernameNode2.addOutput("success", new ClassicPreset.Output(socket,"success", false));
+  usernameNode2.addOutput("fail", new ClassicPreset.Output(socket,"fail", false));
+  usernameNode2.addControl("expression", new ClassicPreset.InputControl("text", {}));
+  usernameNode2.addControl("description", new ClassicPreset.InputControl("text", {}));
+  usernameNode2.addControl("nodeName", new ClassicPreset.InputControl("text", {
+    initial: 0,
+    readonly: false,
+    change(value) { }
+  }))
+  console.log("============usernameNode=============")
+  console.log(JSON.stringify(usernameNode2));
+  console.log("============usernameNode=============")
+  await editor.addNode(usernameNode2);
+
+  await area.translate(startNode.id, { x: 0, y: 0 });
+  await area.translate(usernameNode.id, { x: 500, y: 0 });
+
+  await editor.addConnection(new ClassicPreset.Connection(startNode, "success", usernameNode, "input"));
+  console.log(JSON.stringify(await exportGraph(editor)));
 
   setTimeout(() => {
     AreaExtensions.zoomAt(area, editor.getNodes());
   }, 100);
 
+
+
   return {
     destroy: () => area.destroy()
   };
+
 }

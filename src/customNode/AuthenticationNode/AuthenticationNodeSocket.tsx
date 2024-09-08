@@ -1,7 +1,7 @@
 import * as React from "react";
 import { ClassicPreset } from "rete";
 import styled from "styled-components";
-import { $socketsize } from "./vars";
+import { $socketsize } from "../../vars";
 
 const Styles = styled.div`
   display: inline-block;
@@ -18,7 +18,7 @@ const Styles = styled.div`
   }
 `;
 
-export function CustomSocket<T extends ClassicPreset.Socket>(props: {
+export function AuthenticationNodeSocket<T extends ClassicPreset.Socket>(props: {
   data: T;
 }) {
   return <Styles title={props.data.name} />;

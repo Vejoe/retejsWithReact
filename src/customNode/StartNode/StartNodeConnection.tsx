@@ -20,7 +20,7 @@ const Path = styled.path<{ styles?: (props: any) => any }>`
   ${(props) => props.styles && props.styles(props)}
 `;
 
-export function CustomConnection(props: {
+export function StartNodeConnection(props: {
   data: ClassicScheme["Connection"] & { isLoop?: boolean };
   styles?: () => any;
 }) {
